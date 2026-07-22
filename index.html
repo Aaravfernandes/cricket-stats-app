@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cricket Career</title>
+<meta name="theme-color" content="#1B4332">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cricket">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C2B3A;
+    --paper:#EDE7D3;
+    --card:#F7F3E7;
+    --rule:#C9BFA0;
+    --pitch:#1B4332;
+    --pitch-dark:#123024;
+    --gold:#C9971E;
+    --leather:#7A2E2E;
+    --muted:#7A7460;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans',sans-serif;
+    overscroll-behavior:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{
+    max-width:520px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    background:
+      repeating-linear-gradient(transparent, transparent 27px, var(--rule) 27px, var(--rule) 28px);
+    position:relative;
+  }
+  header.topbar{
+    background:var(--pitch);
+    color:var(--paper);
+    padding:16px 20px 14px;
+    position:sticky; top:0; z-index:20;
+    border-bottom:3px double var(--gold);
+  }
+  .header-row{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  header.topbar h1{
+    font-family:'Spectral',serif;
+    font-weight:700;
+    font-size:20px;
+    letter-spacing:0.5px;
+    margin:0;
+    display:flex; align-items:center; gap:8px;
+  }
+  .player-badge{
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.25);
+    color:var(--paper);
+    border-radius:20px;
+    padding:7px 12px;
+    font-size:12px;
+    font-weight:600;
+    display:flex; align-items:center; gap:6px;
+    cursor:pointer;
+    white-space:nowrap;
+    max-width:170px;
+  }
+  .player-badge .pname{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .player-badge .chev{color:var(--gold); font-size:10px;}
+  header.topbar .sub{
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-top:6px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  main{flex:1; padding:16px 16px 90px;}
+  .view{display:none;}
+  .view.active{display:block; animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---- Dashboard ---- */
+  .player-card{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .player-card .pc-name{font-family:'Spectral',serif; font-weight:700; font-size:17px;}
+  .player-card .pc-age{font-size:12px; color:var(--muted); margin-top:2px;}
+  .player-card .pc-edit{background:none;border:none;color:var(--pitch);font-size:12px;font-weight:700;text-decoration:underline;cursor:pointer;}
+
+  .section-block{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    margin-bottom:16px;
+    overflow:hidden;
+    box-shadow:0 1px 0 rgba(0,0,0,0.03);
+  }
+  .section-head{
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px;
+    background:var(--pitch);
+    color:var(--paper);
+  }
+  .section-head.bowl{background:var(--leather);}
+  .section-head.field{background:#3E4A3D;}
+  .section-head .ico{width:16px; height:16px; flex-shrink:0;}
+  .section-head h2{
+    font-family:'Spectral',serif;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:0.5px;
+    margin:0;
+    text-transform:uppercase;
+  }
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+  }
+  .stat-cell{
+    padding:12px 6px;
+    text-align:center;
+    border-right:1px dashed var(--rule);
+    border-bottom:1px dashed var(--rule);
+  }
+  .stat-cell:nth-child(3n){border-right:none;}
+  .stat-cell .val{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:17px;
+    color:var(--ink);
+    line-height:1.1;
+  }
+  .stat-cell .lbl{
+    font-size:9.5px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:var(--muted);
+    margin-top:3px;
+  }
+  .empty-state{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--muted);
+  }
+  .empty-state .big{font-size:40px; margin-bottom:8px;}
+  .empty-state h3{font-family:'Spectral',serif; color:var(--ink); margin:0 0 6px;}
+  .empty-state p{font-size:13px; margin:0 0 16px;}
+
+  /* ---- Buttons ---- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    background:var(--pitch);
+    color:var(--paper);
+    border:none;
+    border-radius:5px;
+    padding:12px 18px;
+    font-family:'Work Sans',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .btn:active{background:var(--pitch-dark);}
+  .btn.gold{background:var(--gold); color:var(--ink);}
+  .btn.ghost{background:transparent; color:var(--pitch); border:1.5px solid var(--pitch);}
+  .btn.block{width:100%;}
+  .btn.danger{background:var(--leather);}
+  .btn.small{padding:8px 12px; font-size:12.5px;}
+
+  /* ---- Forms ---- */
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:var(--muted);
+    margin-bottom:5px;
+    font-weight:600;
+  }
+  .field input[type=text], .field input[type=date], .field input[type=number], .field select{
+    width:100%;
+    padding:10px 11px;
+    border:1px solid var(--rule);
+    border-radius:5px;
+    background:#fff;
+    font-family:'Work Sans',sans-serif;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .field input:focus, .field select:focus{outline:2px solid var(--gold); outline-offset:0;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;}
+  .row4{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    padding:8px 14px;
+    border-radius:20px;
+    border:1.5px solid var(--rule);
+    background:#fff;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--muted);
+    cursor:pointer;
+    user-select:none;
+  }
+  .chip.active{background:var(--pitch); border-color:var(--pitch); color:var(--paper);}
+
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background:#fff;
+    border:1px solid var(--rule);
+    border-radius:6px;
+    padding:12px 14px;
+    margin-bottom:14px;
+  }
+  .toggle-row span{font-weight:600; font-size:14px;}
+  .switch{position:relative; width:44px; height:24px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{position:absolute; inset:0; background:#D8D2BE; border-radius:24px; transition:.2s; cursor:pointer;}
+  .slider:before{content:""; position:absolute; height:18px; width:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s;}
+  .switch input:checked + .slider{background:var(--pitch);}
+  .switch input:checked + .slider:before{transform:translateX(20px);}
+
+  .subform{
+    background:#fff;
+    border:1px dashed var(--rule);
+    border-radius:6px;
+    padding:14px;
+    margin-bottom:16px;
+  }
+  .subform h3{
+    font-family:'Spectral',serif;
+    font-size:14px;
+    margin:0 0 12px;
+    color:var(--pitch);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+  .subform.bowl h3{color:var(--leather);}
+  .subform.field h3{color:#3E4A3D;}
+  .innings-block{border-top:1px dashed var(--rule); padding-top:12px; margin-top:12px;}
+  .innings-block:first-of-type{border-top:none; padding-top:0; margin-top:0;}
+  .innings-block h4{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--muted);
+    margin:0 0 10px;
+  }
+
+  /* ---- Bottom nav ---- */
+  nav.tabbar{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:520px;
+    background:var(--pitch);
+    display:flex;
+    border-top:3px double var(--gold);
+    z-index:30;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  nav.tabbar button{
+    flex:1;
+    background:none; border:none;
+    color:#B9C7BC;
+    padding:10px 4px 8px;
+    font-family:'Work Sans',sans-serif;
+    font-size:10.5px;
+    font-weight:600;
+    letter-spacing:0.3px;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    cursor:pointer;
+  }
+  nav.tabbar button svg{width:20px; height:20px;}
+  nav.tabbar button.active{color:var(--gold);}
+
+  /* ---- Stats page ---- */
+  .filter-block{margin-bottom:18px;}
+  .filter-title{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:1px;
+    color:var(--muted); margin-bottom:8px; font-weight:700;
+  }
+  .chart-card{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    padding:14px;
+    margin-bottom:16px;
+  }
+  .chart-card h3{
+    font-family:'Spectral',serif;
+    font-size:14px;
+    margin:0 0 10px;
+    color:var(--ink);
+  }
+  canvas{width:100%; display:block;}
+  .no-data{
+    text-align:center; color:var(--muted); font-size:12.5px; padding:20px 0;
+  }
+
+  /* ---- Match list on dashboard ---- */
+  .match-row{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:10px 14px;
+    border-bottom:1px dashed var(--rule);
+    font-size:12.5px;
+  }
+  .match-row:last-child{border-bottom:none;}
+  .match-row .m-left{display:flex; flex-direction:column;}
+  .match-row .m-opp{font-weight:700; font-family:'Spectral',serif; font-size:14px;}
+  .match-row .m-meta{color:var(--muted); font-size:11px; margin-top:1px;}
+  .match-row .m-right{font-family:'JetBrains Mono',monospace; text-align:right; font-size:11.5px;}
+  .match-row .m-right .r1{font-weight:700;}
+  .del-x{
+    background:none;border:none;color:var(--leather);font-size:16px;padding:0 0 0 10px;cursor:pointer;
+  }
+  .list-head-row{display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--pitch); color:var(--paper);}
+  .list-head-row h2{font-family:'Spectral',serif; font-size:15px; margin:0; text-transform:uppercase; letter-spacing:0.5px;}
+
+  /* ---- Overlay (player switcher) ---- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(18,20,15,0.55);
+    display:none; align-items:flex-end; justify-content:center;
+    z-index:100;
+  }
+  .overlay.active{display:flex;}
+  .overlay-panel{
+    background:var(--paper);
+    width:100%; max-width:520px;
+    max-height:82vh;
+    overflow-y:auto;
+    border-radius:16px 16px 0 0;
+    padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+    border-top:3px solid var(--gold);
+  }
+  .overlay-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .overlay-head h2{font-family:'Spectral',serif; margin:0; font-size:18px;}
+  .overlay-head button{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;}
+  .player-row{
+    display:flex; justify-content:space-between; align-items:center;
+    background:#fff; border:1.5px solid var(--rule); border-radius:8px;
+    padding:12px 14px; margin-bottom:10px; cursor:pointer;
+  }
+  .player-row.active{border-color:var(--gold); background:var(--card);}
+  .player-row .pr-name{font-weight:700; font-family:'Spectral',serif; font-size:15px;}
+  .player-row .pr-age{font-size:11.5px; color:var(--muted);}
+  .player-row .pr-tag{font-size:10px; color:var(--gold); font-weight:700; letter-spacing:0.5px; text-transform:uppercase;}
+  .player-row .pr-del{background:none;border:none;color:var(--leather);font-size:15px;cursor:pointer;padding:4px 6px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="header-row">
+      <h1>🏏 Cricket Career</h1>
+      <button class="player-badge" id="playerBadgeBtn">
+        <span class="pname" id="badgeName">Add player</span><span class="chev">▾</span>
+      </button>
+    </div>
+    <div class="sub" id="topbarSub">Career Scorecard</div>
+  </header>
+
+  <main>
+
+    <!-- DASHBOARD -->
+    <section class="view active" id="view-dashboard">
+      <div class="filter-block">
+        <div class="chip-row" id="dashFormatFilters">
+          <div class="chip active" data-fmt="Overall">Overall</div>
+          <div class="chip" data-fmt="Test">Test</div>
+          <div class="chip" data-fmt="ODI">ODI</div>
+          <div class="chip" data-fmt="T20">T20</div>
+          <div class="chip" data-fmt="T10">T10</div>
+        </div>
+      </div>
+      <div id="dashContent"></div>
+    </section>
+
+    <!-- ADD MATCH -->
+    <section class="view" id="view-add">
+      <form id="matchForm">
+        <div class="section-block" style="padding:16px;">
+          <h3 style="font-family:'Spectral',serif;font-size:15px;margin:0 0 14px;color:var(--pitch);text-transform:uppercase;letter-spacing:.5px;">Match Details</h3>
+          <div class="row2">
+            <div class="field"><label>Date</label><input type="date" id="f-date" required></div>
+            <div class="field"><label>Format</label>
+              <select id="f-format">
+                <option>Test</option><option selected>ODI</option><option>T20</option><option>T10</option><option>Custom</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Opposition</label>
+            <select id="f-opp-select">
+              <option>Australia</option><option>England</option><option>India</option><option>Pakistan</option>
+              <option>South Africa</option><option>New Zealand</option><option>Sri Lanka</option>
+              <option>West Indies</option><option>Bangladesh</option><option>Afghanistan</option>
+              <option>Zimbabwe</option><option>Ireland</option><option>Scotland</option><option>Netherlands</option>
+              <option>UAE</option><option>USA</option><option>Nepal</option><option>Namibia</option>
+              <option>Oman</option><option>Canada</option><option>PNG</option>
+              <option value="__other__">Other (type below)</option>
+            </select>
+            <input type="text" id="f-opp-other" placeholder="Team / club name" style="margin-top:8px; display:none;">
+          </div>
+
+          <div class="row2">
+            <div class="field"><label>Ground</label><input type="text" id="f-ground" placeholder="e.g. Southampton"></div>
+            <div class="field">
+              <label>Competition</label>
+              <select id="f-comp-select">
+                <option>Bilateral Series (Test)</option>
+                <option selected>Bilateral Series (ODI)</option>
+                <option>Bilateral Series (T20I)</option>
+                <option>ICC World Cup</option>
+                <option>ICC T20 World Cup</option>
+                <option>ICC Champions Trophy</option>
+                <option>ICC World Test Championship</option>
+                <option>Asia Cup</option>
+                <option>Domestic League</option>
+                <option>Franchise T20 League</option>
+                <option>Club / School Match</option>
+                <option value="__other__">Other (type below)</option>
+              </select>
+              <input type="text" id="f-comp-other" placeholder="Competition name" style="margin-top:8px; display:none;">
+            </div>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <span>Batted in this match?</span>
+          <label class="switch"><input type="checkbox" id="f-bat-toggle" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row" id="batTwiceRow" style="display:none;">
+          <span>Batted in both innings?</span>
+          <label class="switch"><input type="checkbox" id="f-bat-twice-toggle"><span class="slider"></span></label>
+        </div>
+
+        <div class="subform" id="batFields">
+          <h3>Batting</h3>
+          <div class="innings-block" id="batInnings1">
+            <h4 id="batInnings1Label">Innings</h4>
+            <div class="row3">
+              <div class="field"><label>Runs</label><input type="number" class="bat-runs" min="0" value="0"></div>
+              <div class="field"><label>Balls</label><input type="number" class="bat-balls" min="0" value="0"></div>
+              <div class="field"><label>4s</label><input type="number" class="bat-fours" min="0" value="0"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>6s</label><input type="number" class="bat-sixes" min="0" value="0"></div>
+              <div class="field"><label>Dismissal</label>
+                <select class="bat-dismissal">
+                  <option value="not out">Not Out</option>
+                  <option value="bowled">Bowled</option>
+                  <option value="caught">Caught</option>
+                  <option value="lbw">LBW</option>
+                  <option value="run out">Run Out</option>
+                  <option value="stumped">Stumped</option>
+                  <option value="hit wicket">Hit Wicket</option>
+                  <option value="retired hurt">Retired Hurt</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="innings-block" id="batInnings2" style="display:none;">
+            <h4>2nd Innings</h4>
+            <div class="row3">
+              <div class="field"><label>Runs</label><input type="number" class="bat-runs" min="0" value="0"></div>
+              <div class="field"><label>Balls</label><input type="number" class="bat-balls" min="0" value="0"></div>
+              <div class="field"><label>4s</label><input type="number" class="bat-fours" min="0" value="0"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>6s</label><input type="number" class="bat-sixes" min="0" value="0"></div>
+              <div class="field"><label>Dismissal</label>
+                <select class="bat-dismissal">
+                  <option value="not out">Not Out</option>
+                  <option value="bowled">Bowled</option>
+                  <option value="caught">Caught</option>
+                  <option value="lbw">LBW</option>
+                  <option value="run out">Run Out</option>
+                  <option value="stumped">Stumped</option>
+                  <option value="hit wicket">Hit Wicket</option>
+                  <option value="retired hurt">Retired Hurt</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <span>Bowled in this match?</span>
+          <label class="switch"><input type="checkbox" id="f-bowl-toggle"><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row" id="bowlTwiceRow" style="display:none;">
+          <span>Bowled in both innings?</span>
+          <label class="switch"><input type="checkbox" id="f-bowl-twice-toggle"><span class="slider"></span></label>
+        </div>
+
+        <div class="subform bowl" id="bowlFields" style="display:none;">
+          <h3>Bowling</h3>
+          <div class="innings-block" id="bowlInnings1">
+            <h4 id="bowlInnings1Label">Innings</h4>
+            <div class="row2">
+              <div class="field"><label>Overs (e.g. 4.3)</label><input type="text" class="bowl-overs" placeholder="0.0" value="0"></div>
+              <div class="field"><label>Maidens</label><input type="number" class="bowl-maidens" min="0" value="0"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>Runs Conceded</label><input type="number" class="bowl-runsconc" min="0" value="0"></div>
+              <div class="field"><label>Wickets</label><input type="number" class="bowl-wickets" min="0" value="0"></div>
+            </div>
+          </div>
+          <div class="innings-block" id="bowlInnings2" style="display:none;">
+            <h4>2nd Innings</h4>
+            <div class="row2">
+              <div class="field"><label>Overs (e.g. 4.3)</label><input type="text" class="bowl-overs" placeholder="0.0" value="0"></div>
+              <div class="field"><label>Maidens</label><input type="number" class="bowl-maidens" min="0" value="0"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>Runs Conceded</label><input type="number" class="bowl-runsconc" min="0" value="0"></div>
+              <div class="field"><label>Wickets</label><input type="number" class="bowl-wickets" min="0" value="0"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subform field" style="border-style:dashed;">
+          <h3>Fielding</h3>
+          <div class="row3">
+            <div class="field"><label>Catches</label><input type="number" id="f-catches" min="0" value="0"></div>
+            <div class="field"><label>Run Outs</label><input type="number" id="f-runouts" min="0" value="0"></div>
+            <div class="field"><label>Stumpings</label><input type="number" id="f-stumpings" min="0" value="0"></div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn gold block" style="padding:14px; font-size:15px;">Save Match</button>
+      </form>
+    </section>
+
+    <!-- STATISTICS -->
+    <section class="view" id="view-stats">
+      <div class="filter-block">
+        <div class="filter-title">Format</div>
+        <div class="chip-row" id="formatFilters">
+          <div class="chip active" data-fmt="Overall">Overall</div>
+          <div class="chip" data-fmt="Test">Test</div>
+          <div class="chip" data-fmt="ODI">ODI</div>
+          <div class="chip" data-fmt="T20">T20</div>
+          <div class="chip" data-fmt="T10">T10</div>
+        </div>
+      </div>
+      <div class="filter-block">
+        <div class="filter-title">Period</div>
+        <div class="chip-row" id="periodFilters">
+          <div class="chip active" data-period="all">All Time</div>
+          <div class="chip" data-period="year">This Year</div>
+          <div class="chip" data-period="30d">Last 30 Days</div>
+        </div>
+      </div>
+
+      <div class="chart-card"><h3>Runs Over Time</h3><canvas id="chartRuns" height="160"></canvas></div>
+      <div class="chart-card"><h3>Batting Average Progression</h3><canvas id="chartAvg" height="160"></canvas></div>
+      <div class="chart-card"><h3>Strike Rate Progression</h3><canvas id="chartSR" height="160"></canvas></div>
+      <div class="chart-card"><h3>Wickets Over Time</h3><canvas id="chartWkts" height="160"></canvas></div>
+    </section>
+
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab-btn active" data-view="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21l6-6M14 3l7 7-9 9-7-7 9-9z"/></svg>
+      Dashboard
+    </button>
+    <button class="tab-btn" data-view="add">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Add Match
+    </button>
+    <button class="tab-btn" data-view="stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+      Statistics
+    </button>
+  </nav>
+
+  <!-- Player switcher overlay -->
+  <div class="overlay" id="playerOverlay">
+    <div class="overlay-panel">
+      <div class="overlay-head"><h2>Players</h2><button id="closeOverlay">✕</button></div>
+      <div id="playerList"></div>
+      <button class="btn ghost block" id="showAddPlayerForm" style="margin-top:6px;">+ Add New Player</button>
+      <div class="subform" id="addPlayerForm" style="display:none; margin-top:14px;">
+        <h3>New Player</h3>
+        <div class="row2">
+          <div class="field"><label>Name</label><input type="text" id="np-name" placeholder="Player name"></div>
+          <div class="field"><label>Age</label><input type="number" id="np-age" min="0" placeholder="Age"></div>
+        </div>
+        <button class="btn gold block" id="saveNewPlayer">Save Player</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const PLAYERS_KEY = "cricketCareerPlayers_v2";
+  const MATCHES_KEY = "cricketCareerMatches_v2";
+  const ACTIVE_KEY = "cricketCareerActivePlayer_v2";
+
+  function loadJSON(key, fallback){
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+    catch(e){ return fallback; }
+  }
+  function saveJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+  let players = loadJSON(PLAYERS_KEY, []);
+  let matches = loadJSON(MATCHES_KEY, []);
+  let activePlayerId = localStorage.getItem(ACTIVE_KEY) || null;
+
+  // ---- One-time migration from the older single-player version ----
+  (function migrate(){
+    if(players.length>0) return;
+    const old = loadJSON("cricketCareerMatches_v1", null);
+    if(!old || !Array.isArray(old) || old.length===0) return;
+    const pid = "p_" + Date.now().toString(36);
+    players = [{id:pid, name:"My Career", age:null, createdAt:Date.now()}];
+    matches = old.map(m=>({
+      id:m.id, playerId:pid, date:m.date, opposition:m.opposition, ground:m.ground,
+      competition:m.competition, format:m.format,
+      batting: m.batted ? [{runs:m.runs||0, balls:m.balls||0, fours:m.fours||0, sixes:m.sixes||0, out:m.out, dismissal:m.dismissal||''}] : [],
+      bowling: m.bowled ? [{overs:m.overs||'0', maidens:m.maidens||0, runsConceded:m.runsConceded||0, wickets:m.wickets||0}] : [],
+      catches:m.catches||0, runOuts:m.runOuts||0, stumpings:m.stumpings||0
+    }));
+    activePlayerId = pid;
+    saveJSON(PLAYERS_KEY, players);
+    saveJSON(MATCHES_KEY, matches);
+    localStorage.setItem(ACTIVE_KEY, pid);
+  })();
+
+  if(!activePlayerId && players.length>0){ activePlayerId = players[0].id; localStorage.setItem(ACTIVE_KEY, activePlayerId); }
+
+  function getActivePlayer(){ return players.find(p=>p.id===activePlayerId) || null; }
+  function myMatches(){ return matches.filter(m=>m.playerId===activePlayerId); }
+
+  function persistPlayers(){ saveJSON(PLAYERS_KEY, players); }
+  function persistMatches(){ saveJSON(MATCHES_KEY, matches); }
+  function setActivePlayer(id){ activePlayerId = id; localStorage.setItem(ACTIVE_KEY, id); }
+
+  // ---------- Player badge + overlay ----------
+  const badgeName = document.getElementById('badgeName');
+  const playerOverlay = document.getElementById('playerOverlay');
+  const playerListEl = document.getElementById('playerList');
+  const addPlayerForm = document.getElementById('addPlayerForm');
+
+  function updateBadge(){
+    const p = getActivePlayer();
+    badgeName.textContent = p ? (p.name + (p.age ? ' · ' + p.age : '')) : 'Add player';
+  }
+
+  function renderPlayerList(){
+    if(players.length===0){
+      playerListEl.innerHTML = `<p style="font-size:13px;color:var(--muted);margin:4px 0 14px;">No players yet — add your first profile below.</p>`;
+      return;
+    }
+    playerListEl.innerHTML = players.map(p=>`
+      <div class="player-row ${p.id===activePlayerId?'active':''}" data-id="${p.id}">
+        <div>
+          <div class="pr-name">${escapeHtml(p.name)}</div>
+          <div class="pr-age">${p.age? 'Age '+p.age : ''}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          ${p.id===activePlayerId ? '<span class="pr-tag">Active</span>' : ''}
+          <button class="pr-del" data-del="${p.id}" aria-label="Delete player">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openOverlay(){
+    renderPlayerList();
+    addPlayerForm.style.display = players.length===0 ? '' : 'none';
+    playerOverlay.classList.add('active');
+  }
+  function closeOverlay(){ playerOverlay.classList.remove('active'); }
+
+  document.getElementById('playerBadgeBtn').addEventListener('click', openOverlay);
+  document.getElementById('closeOverlay').addEventListener('click', ()=>{
+    if(players.length===0){ alert('Add at least one player to continue.'); return; }
+    closeOverlay();
+  });
+  document.getElementById('showAddPlayerForm').addEventListener('click', ()=>{
+    addPlayerForm.style.display = addPlayerForm.style.display==='none' ? '' : 'none';
+  });
+
+  playerListEl.addEventListener('click', (e)=>{
+    const delBtn = e.target.closest('[data-del]');
+    if(delBtn){
+      const id = delBtn.dataset.del;
+      const p = players.find(x=>x.id===id);
+      if(!confirm(`Delete "${p.name}" and all their match data? This cannot be undone.`)) return;
+      players = players.filter(x=>x.id!==id);
+      matches = matches.filter(m=>m.playerId!==id);
+      persistPlayers(); persistMatches();
+      if(activePlayerId===id){
+        activePlayerId = players.length>0 ? players[0].id : null;
+        if(activePlayerId) localStorage.setItem(ACTIVE_KEY, activePlayerId);
+        else localStorage.removeItem(ACTIVE_KEY);
+      }
+      updateBadge(); renderPlayerList(); renderDashboard();
+      if(players.length===0) addPlayerForm.style.display='';
+      return;
+    }
+    const row = e.target.closest('.player-row');
+    if(row){
+      setActivePlayer(row.dataset.id);
+      updateBadge(); renderPlayerList(); renderDashboard();
+      closeOverlay();
+    }
+  });
+
+  document.getElementById('saveNewPlayer').addEventListener('click', ()=>{
+    const name = document.getElementById('np-name').value.trim();
+    const age = document.getElementById('np-age').value;
+    if(!name){ alert('Please enter a name.'); return; }
+    const p = {id:'p_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), name, age: age? Number(age): null, createdAt:Date.now()};
+    players.push(p);
+    persistPlayers();
+    setActivePlayer(p.id);
+    document.getElementById('np-name').value=''; document.getElementById('np-age').value='';
+    addPlayerForm.style.display='none';
+    updateBadge(); renderPlayerList(); renderDashboard();
+  });
+
+  updateBadge();
+  if(players.length===0) openOverlay();
+
+  // ---------- Navigation ----------
+  const views = {
+    dashboard: document.getElementById('view-dashboard'),
+    add: document.getElementById('view-add'),
+    stats: document.getElementById('view-stats')
+  };
+  const tabbarSubs = { dashboard: "Career Scorecard", add: "New Innings Entry", stats: "Trends & Analysis" };
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(players.length===0){ openOverlay(); return; }
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      Object.values(views).forEach(v=>v.classList.remove('active'));
+      const key = btn.dataset.view;
+      views[key].classList.add('active');
+      document.getElementById('topbarSub').textContent = tabbarSubs[key];
+      if(key==='dashboard') renderDashboard();
+      if(key==='stats') renderStats();
+    });
+  });
+
+  // ---------- Add Match form ----------
+  const batToggle = document.getElementById('f-bat-toggle');
+  const bowlToggle = document.getElementById('f-bowl-toggle');
+  const batTwiceToggle = document.getElementById('f-bat-twice-toggle');
+  const bowlTwiceToggle = document.getElementById('f-bowl-twice-toggle');
+  const batFields = document.getElementById('batFields');
+  const bowlFields = document.getElementById('bowlFields');
+  const batTwiceRow = document.getElementById('batTwiceRow');
+  const bowlTwiceRow = document.getElementById('bowlTwiceRow');
+  const batInnings1Label = document.getElementById('batInnings1Label');
+  const batInnings2 = document.getElementById('batInnings2');
+  const bowlInnings1Label = document.getElementById('bowlInnings1Label');
+  const bowlInnings2 = document.getElementById('bowlInnings2');
+  const formatSelect = document.getElementById('f-format');
+  const oppSelect = document.getElementById('f-opp-select');
+  const oppOther = document.getElementById('f-opp-other');
+  const compSelect = document.getElementById('f-comp-select');
+  const compOther = document.getElementById('f-comp-other');
+
+  batToggle.addEventListener('change', ()=>{ batFields.style.display = batToggle.checked ? '' : 'none'; refreshTestRows(); });
+  bowlToggle.addEventListener('change', ()=>{ bowlFields.style.display = bowlToggle.checked ? '' : 'none'; refreshTestRows(); });
+  batTwiceToggle.addEventListener('change', ()=>{
+    batInnings2.style.display = batTwiceToggle.checked ? '' : 'none';
+    batInnings1Label.textContent = batTwiceToggle.checked ? '1st Innings' : 'Innings';
+  });
+  bowlTwiceToggle.addEventListener('change', ()=>{
+    bowlInnings2.style.display = bowlTwiceToggle.checked ? '' : 'none';
+    bowlInnings1Label.textContent = bowlTwiceToggle.checked ? '1st Innings' : 'Innings';
+  });
+  function refreshTestRows(){
+    const isTest = formatSelect.value === 'Test';
+    batTwiceRow.style.display = (isTest && batToggle.checked) ? '' : 'none';
+    bowlTwiceRow.style.display = (isTest && bowlToggle.checked) ? '' : 'none';
+    if(!isTest){
+      batTwiceToggle.checked = false; batInnings2.style.display='none'; batInnings1Label.textContent='Innings';
+      bowlTwiceToggle.checked = false; bowlInnings2.style.display='none'; bowlInnings1Label.textContent='Innings';
+    }
+  }
+  formatSelect.addEventListener('change', refreshTestRows);
+
+  oppSelect.addEventListener('change', ()=>{ oppOther.style.display = oppSelect.value==='__other__' ? '' : 'none'; });
+  compSelect.addEventListener('change', ()=>{ compOther.style.display = compSelect.value==='__other__' ? '' : 'none'; });
+
+  document.getElementById('f-date').valueAsDate = new Date();
+
+  function collectInnings(container, selectors){
+    return {
+      runs: Number(container.querySelector(selectors.runs).value)||0,
+      balls: Number(container.querySelector(selectors.balls).value)||0,
+      fours: Number(container.querySelector(selectors.fours).value)||0,
+      sixes: Number(container.querySelector(selectors.sixes).value)||0,
+      dismissal: container.querySelector(selectors.dismissal).value,
+      out: container.querySelector(selectors.dismissal).value !== 'not out'
+    };
+  }
+
+  document.getElementById('matchForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    if(players.length===0){ openOverlay(); return; }
+
+    const batted = batToggle.checked;
+    const bowled = bowlToggle.checked;
+    const isTest = formatSelect.value === 'Test';
+
+    let battingArr = [];
+    if(batted){
+      const b1 = document.getElementById('batInnings1');
+      battingArr.push(collectInnings(b1, {runs:'.bat-runs',balls:'.bat-balls',fours:'.bat-fours',sixes:'.bat-sixes',dismissal:'.bat-dismissal'}));
+      if(isTest && batTwiceToggle.checked){
+        battingArr.push(collectInnings(batInnings2, {runs:'.bat-runs',balls:'.bat-balls',fours:'.bat-fours',sixes:'.bat-sixes',dismissal:'.bat-dismissal'}));
+      }
+    }
+    let bowlingArr = [];
+    if(bowled){
+      const bw1 = document.getElementById('bowlInnings1');
+      bowlingArr.push({
+        overs: bw1.querySelector('.bowl-overs').value || '0',
+        maidens: Number(bw1.querySelector('.bowl-maidens').value)||0,
+        runsConceded: Number(bw1.querySelector('.bowl-runsconc').value)||0,
+        wickets: Number(bw1.querySelector('.bowl-wickets').value)||0
+      });
+      if(isTest && bowlTwiceToggle.checked){
+        bowlingArr.push({
+          overs: bowlInnings2.querySelector('.bowl-overs').value || '0',
+          maidens: Number(bowlInnings2.querySelector('.bowl-maidens').value)||0,
+          runsConceded: Number(bowlInnings2.querySelector('.bowl-runsconc').value)||0,
+          wickets: Number(bowlInnings2.querySelector('.bowl-wickets').value)||0
+        });
+      }
+    }
+
+    const opposition = oppSelect.value==='__other__' ? (oppOther.value.trim()||'Unknown') : oppSelect.value;
+    const competition = compSelect.value==='__other__' ? (compOther.value.trim()||'') : compSelect.value;
+
+    const match = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+      playerId: activePlayerId,
+      date: document.getElementById('f-date').value,
+      opposition, ground: document.getElementById('f-ground').value.trim(),
+      competition, format: formatSelect.value,
+      batting: battingArr, bowling: bowlingArr,
+      catches: Number(document.getElementById('f-catches').value)||0,
+      runOuts: Number(document.getElementById('f-runouts').value)||0,
+      stumpings: Number(document.getElementById('f-stumpings').value)||0
+    };
+    matches.push(match);
+    persistMatches();
+    this.reset();
+    document.getElementById('f-date').valueAsDate = new Date();
+    batToggle.checked = true; batFields.style.display='';
+    bowlToggle.checked = false; bowlFields.style.display='none';
+    batTwiceToggle.checked = false; batInnings2.style.display='none'; batInnings1Label.textContent='Innings';
+    bowlTwiceToggle.checked = false; bowlInnings2.style.display='none'; bowlInnings1Label.textContent='Innings';
+    oppOther.style.display='none'; compOther.style.display='none';
+    refreshTestRows();
+
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector('.tab-btn[data-view="dashboard"]').classList.add('active');
+    Object.values(views).forEach(v=>v.classList.remove('active'));
+    views.dashboard.classList.add('active');
+    document.getElementById('topbarSub').textContent = tabbarSubs.dashboard;
+    renderDashboard();
+  });
+
+  function deleteMatch(id){
+    if(!confirm('Delete this match? This cannot be undone.')) return;
+    matches = matches.filter(m=>m.id!==id);
+    persistMatches();
+    renderDashboard();
+  }
+  window.deleteMatch = deleteMatch;
+
+  // ---------- Stat computation ----------
+  function parseOversToBalls(oversStr){
+    const s = String(oversStr||'0').trim();
+    const parts = s.split('.');
+    const whole = parseInt(parts[0],10) || 0;
+    let ballPart = parts[1] ? parseInt(parts[1][0],10) : 0;
+    if(isNaN(ballPart) || ballPart>5) ballPart = 0;
+    return whole*6 + ballPart;
+  }
+  function ballsToOversStr(balls){
+    const whole = Math.floor(balls/6);
+    const rem = balls % 6;
+    return whole + '.' + rem;
+  }
+
+  function flattenBatting(list){
+    return list.flatMap(m => (m.batting||[]).map(b => ({...b, date:m.date})));
+  }
+  function flattenBowling(list){
+    return list.flatMap(m => (m.bowling||[]).map(b => ({...b, date:m.date})));
+  }
+
+  function computeStats(list){
+    const battingInnings = flattenBatting(list);
+    const bowlingInnings = flattenBowling(list);
+
+    const matchesCount = list.length;
+    const innings = battingInnings.length;
+    const notOuts = battingInnings.filter(m=>!m.out).length;
+    const runs = battingInnings.reduce((s,m)=>s+m.runs,0);
+    const ballsFaced = battingInnings.reduce((s,m)=>s+m.balls,0);
+    const fours = battingInnings.reduce((s,m)=>s+m.fours,0);
+    const sixes = battingInnings.reduce((s,m)=>s+m.sixes,0);
+    const fifties = battingInnings.filter(m=>m.runs>=50 && m.runs<100).length;
+    const hundreds = battingInnings.filter(m=>m.runs>=100).length;
+
+    let highest = null;
+    battingInnings.forEach(m=>{
+      if(!highest || m.runs>highest.runs || (m.runs===highest.runs && !m.out && highest.out)){
+        highest = m;
+      }
+    });
+    const highestScoreStr = highest ? (highest.runs + (!highest.out ? '*' : '')) : '-';
+
+    const dismissed = innings - notOuts;
+    const battingAvg = dismissed>0 ? (runs/dismissed) : (runs>0 ? runs : null);
+    const strikeRate = ballsFaced>0 ? (runs/ballsFaced*100) : null;
+
+    const totalBallsBowled = bowlingInnings.reduce((s,m)=>s+parseOversToBalls(m.overs),0);
+    const maidens = bowlingInnings.reduce((s,m)=>s+m.maidens,0);
+    const runsConceded = bowlingInnings.reduce((s,m)=>s+m.runsConceded,0);
+    const wickets = bowlingInnings.reduce((s,m)=>s+m.wickets,0);
+    const threeWkt = bowlingInnings.filter(m=>m.wickets>=3 && m.wickets<5).length;
+    const fiveWkt = bowlingInnings.filter(m=>m.wickets>=5).length;
+
+    let bestFigures = null;
+    bowlingInnings.forEach(m=>{
+      if(!bestFigures || m.wickets>bestFigures.wickets ||
+        (m.wickets===bestFigures.wickets && m.runsConceded<bestFigures.runsConceded)){
+        bestFigures = m;
+      }
+    });
+    const bestFiguresStr = bestFigures ? (bestFigures.wickets+'/'+bestFigures.runsConceded) : '-';
+
+    const totalOversReal = totalBallsBowled/6;
+    const economy = totalOversReal>0 ? (runsConceded/totalOversReal) : null;
+    const bowlingAvg = wickets>0 ? (runsConceded/wickets) : null;
+    const bowlSR = wickets>0 ? (totalBallsBowled/wickets) : null;
+
+    const catches = list.reduce((s,m)=>s+(m.catches||0),0);
+    const runOuts = list.reduce((s,m)=>s+(m.runOuts||0),0);
+    const stumpings = list.reduce((s,m)=>s+(m.stumpings||0),0);
+
+    return {
+      matchesCount, innings, notOuts, runs, highestScoreStr, battingAvg, strikeRate,
+      fifties, hundreds, fours, sixes,
+      overs: ballsToOversStr(totalBallsBowled), maidens, runsConceded, wickets,
+      bestFiguresStr, economy, bowlingAvg, bowlSR, threeWkt, fiveWkt,
+      catches, runOuts, stumpings
+    };
+  }
+
+  function fmt(n, decimals){
+    if(n===null || n===undefined || isNaN(n)) return '-';
+    return Number(n).toFixed(decimals===undefined?2:decimals);
+  }
+
+  // ---------- Dashboard render ----------
+  let dashFormat = 'Overall';
+  document.getElementById('dashFormatFilters').addEventListener('click', e=>{
+    const chip = e.target.closest('.chip'); if(!chip) return;
+    document.querySelectorAll('#dashFormatFilters .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    dashFormat = chip.dataset.fmt;
+    renderDashboard();
+  });
+
+  function renderDashboard(){
+    const el = document.getElementById('dashContent');
+    const player = getActivePlayer();
+    if(!player){
+      el.innerHTML = `
+        <div class="empty-state">
+          <div class="big">🏏</div>
+          <h3>No player selected</h3>
+          <p>Add a player profile to start tracking a career.</p>
+          <button class="btn gold" onclick="document.getElementById('playerBadgeBtn').click()">Add Player</button>
+        </div>`;
+      return;
+    }
+    let list = myMatches();
+    if(dashFormat !== 'Overall') list = list.filter(m=>m.format===dashFormat);
+
+    const playerCard = `
+      <div class="player-card">
+        <div><div class="pc-name">${escapeHtml(player.name)}</div><div class="pc-age">${player.age? player.age+' years old' : ''}</div></div>
+        <button class="pc-edit" onclick="document.getElementById('playerBadgeBtn').click()">Switch</button>
+      </div>`;
+
+    if(list.length===0){
+      el.innerHTML = playerCard + `
+        <div class="empty-state">
+          <div class="big">🏏</div>
+          <h3>No matches yet</h3>
+          <p>${dashFormat==='Overall' ? 'Add your first innings to start building this career scorecard.' : 'No '+dashFormat+' matches recorded yet.'}</p>
+        </div>`;
+      return;
+    }
+    const s = computeStats(list);
+    const sortedRecent = [...list].sort((a,b)=> (b.date||'').localeCompare(a.date||'')).slice(0,8);
+
+    el.innerHTML = playerCard + `
+      <div class="section-block">
+        <div class="section-head"><span class="ico">🏏</span><h2>Batting</h2></div>
+        <div class="stat-grid">
+          ${statCell(s.matchesCount,'Matches')}
+          ${statCell(s.innings,'Innings')}
+          ${statCell(s.notOuts,'Not Outs')}
+          ${statCell(s.runs,'Runs')}
+          ${statCell(s.highestScoreStr,'Highest Score')}
+          ${statCell(fmt(s.battingAvg),'Average')}
+          ${statCell(fmt(s.strikeRate),'Strike Rate')}
+          ${statCell(s.fifties,'50s')}
+          ${statCell(s.hundreds,'100s')}
+          ${statCell(s.fours,'4s')}
+          ${statCell(s.sixes,'6s')}
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-head bowl"><span class="ico">🔴</span><h2>Bowling</h2></div>
+        <div class="stat-grid">
+          ${statCell(s.overs,'Overs')}
+          ${statCell(s.maidens,'Maidens')}
+          ${statCell(s.runsConceded,'Runs Conceded')}
+          ${statCell(s.wickets,'Wickets')}
+          ${statCell(s.bestFiguresStr,'Best Figures')}
+          ${statCell(fmt(s.economy),'Economy')}
+          ${statCell(fmt(s.bowlingAvg),'Bowling Avg')}
+          ${statCell(fmt(s.bowlSR),'Strike Rate')}
+          ${statCell(s.threeWkt+' / '+s.fiveWkt,'3W & 5W')}
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-head field"><span class="ico">🧤</span><h2>Fielding</h2></div>
+        <div class="stat-grid">
+          ${statCell(s.catches,'Catches')}
+          ${statCell(s.runOuts,'Run Outs')}
+          ${statCell(s.stumpings,'Stumpings')}
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="list-head-row"><h2>Recent Matches</h2></div>
+        <div>
+          ${sortedRecent.map(m=>`
+            <div class="match-row">
+              <div class="m-left">
+                <span class="m-opp">vs ${escapeHtml(m.opposition)}</span>
+                <span class="m-meta">${m.date||''} · ${m.format}${m.competition? ' · '+escapeHtml(m.competition):''}${m.ground? ' · '+escapeHtml(m.ground):''}</span>
+              </div>
+              <div class="m-right">
+                ${(m.batting||[]).map(b=>`<div class="r1">${b.runs}${!b.out?'*':''} (${b.balls})</div>`).join('')}
+                ${(m.bowling||[]).map(b=>`<div>${b.wickets}/${b.runsConceded} (${b.overs})</div>`).join('')}
+                <button class="del-x" onclick="deleteMatch('${m.id}')" aria-label="Delete match">✕</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function statCell(val, label){
+    return `<div class="stat-cell"><div class="val">${val===null||val===undefined?'-':val}</div><div class="lbl">${label}</div></div>`;
+  }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- Statistics view ----------
+  let activeFormat = 'Overall';
+  let activePeriod = 'all';
+
+  document.getElementById('formatFilters').addEventListener('click', e=>{
+    const chip = e.target.closest('.chip'); if(!chip) return;
+    document.querySelectorAll('#formatFilters .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFormat = chip.dataset.fmt;
+    renderStats();
+  });
+  document.getElementById('periodFilters').addEventListener('click', e=>{
+    const chip = e.target.closest('.chip'); if(!chip) return;
+    document.querySelectorAll('#periodFilters .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    activePeriod = chip.dataset.period;
+    renderStats();
+  });
+
+  function filteredMatches(){
+    let list = myMatches();
+    if(activeFormat !== 'Overall'){
+      list = list.filter(m=>m.format===activeFormat);
+    }
+    if(activePeriod==='year'){
+      const y = new Date().getFullYear();
+      list = list.filter(m=> m.date && new Date(m.date).getFullYear()===y);
+    } else if(activePeriod==='30d'){
+      const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30);
+      list = list.filter(m=> m.date && new Date(m.date) >= cutoff);
+    }
+    return list.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  }
+
+  function renderStats(){
+    const list = filteredMatches();
+    drawRunsOverTime(list);
+    drawAvgProgression(list);
+    drawSRProgression(list);
+    drawWicketsOverTime(list);
+  }
+
+  // ---------- Canvas chart helpers ----------
+  function setupCanvas(canvas){
+    const dpr = window.devicePixelRatio || 1;
+    const cssWidth = canvas.parentElement.clientWidth - 28;
+    const cssHeight = 150;
+    canvas.style.width = cssWidth+'px';
+    canvas.style.height = cssHeight+'px';
+    canvas.width = cssWidth*dpr;
+    canvas.height = cssHeight*dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssWidth,cssHeight);
+    return {ctx, w:cssWidth, h:cssHeight};
+  }
+
+  function noDataMsg(canvas, msg){
+    const parent = canvas.parentElement;
+    let n = parent.querySelector('.no-data');
+    if(!n){ n = document.createElement('div'); n.className='no-data'; parent.appendChild(n); }
+    n.textContent = msg;
+    canvas.style.display='none';
+  }
+  function clearNoData(canvas){
+    canvas.style.display='';
+    const n = canvas.parentElement.querySelector('.no-data');
+    if(n) n.remove();
+  }
+
+  function drawAxes(ctx,w,h,pad){
+    ctx.strokeStyle = '#C9BFA0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, h-pad.b);
+    ctx.lineTo(w-pad.r, h-pad.b);
+    ctx.moveTo(pad.l, pad.t);
+    ctx.lineTo(pad.l, h-pad.b);
+    ctx.stroke();
+  }
+
+  function drawBarChart(canvas, values, color){
+    if(values.length===0){ noDataMsg(canvas,'No data yet for this filter.'); return; }
+    clearNoData(canvas);
+    const {ctx,w,h} = setupCanvas(canvas);
+    const pad = {l:28,r:10,t:10,b:22};
+    const max = Math.max(...values, 1);
+    drawAxes(ctx,w,h,pad);
+    const plotW = w-pad.l-pad.r;
+    const plotH = h-pad.t-pad.b;
+    const bw = plotW/values.length;
+    ctx.fillStyle = color;
+    values.forEach((v,i)=>{
+      const barH = (v/max)*plotH;
+      const x = pad.l + i*bw + bw*0.15;
+      const y = h-pad.b-barH;
+      ctx.fillRect(x, y, bw*0.7, barH);
+    });
+    ctx.fillStyle = '#7A7460';
+    ctx.font = '10px Work Sans, sans-serif';
+    ctx.fillText(max.toFixed(0), 2, pad.t+8);
+    ctx.fillText('0', 10, h-pad.b+2);
+  }
+
+  function drawLineChart(canvas, values, color){
+    if(values.length===0){ noDataMsg(canvas,'No data yet for this filter.'); return; }
+    clearNoData(canvas);
+    const {ctx,w,h} = setupCanvas(canvas);
+    const pad = {l:32,r:10,t:10,b:22};
+    const max = Math.max(...values, 1);
+    const min = Math.min(...values, 0);
+    const range = (max-min)||1;
+    drawAxes(ctx,w,h,pad);
+    const plotW = w-pad.l-pad.r;
+    const plotH = h-pad.t-pad.b;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    values.forEach((v,i)=>{
+      const x = pad.l + (values.length===1?plotW/2:(i/(values.length-1))*plotW);
+      const y = h-pad.b - ((v-min)/range)*plotH;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.fillStyle = color;
+    values.forEach((v,i)=>{
+      const x = pad.l + (values.length===1?plotW/2:(i/(values.length-1))*plotW);
+      const y = h-pad.b - ((v-min)/range)*plotH;
+      ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2); ctx.fill();
+    });
+    ctx.fillStyle = '#7A7460';
+    ctx.font = '10px Work Sans, sans-serif';
+    ctx.fillText(max.toFixed(1), 2, pad.t+8);
+    ctx.fillText(min.toFixed(1), 2, h-pad.b);
+  }
+
+  function drawRunsOverTime(list){
+    const innings = flattenBatting(list);
+    drawBarChart(document.getElementById('chartRuns'), innings.map(m=>m.runs), '#1B4332');
+  }
+  function drawWicketsOverTime(list){
+    const bowlInns = flattenBowling(list);
+    drawBarChart(document.getElementById('chartWkts'), bowlInns.map(m=>m.wickets), '#7A2E2E');
+  }
+  function drawAvgProgression(list){
+    const innings = flattenBatting(list);
+    let runs=0, dismissals=0;
+    const vals = [];
+    innings.forEach(m=>{
+      runs += m.runs;
+      if(m.out) dismissals++;
+      vals.push(dismissals>0 ? runs/dismissals : runs);
+    });
+    drawLineChart(document.getElementById('chartAvg'), vals, '#C9971E');
+  }
+  function drawSRProgression(list){
+    const innings = flattenBatting(list);
+    let runs=0, balls=0;
+    const vals = [];
+    innings.forEach(m=>{
+      runs += m.runs; balls += m.balls;
+      vals.push(balls>0 ? (runs/balls*100) : 0);
+    });
+    drawLineChart(document.getElementById('chartSR'), vals, '#1B4332');
+  }
+
+  window.addEventListener('resize', ()=>{
+    if(views.stats.classList.contains('active')) renderStats();
+  });
+
+  // ---------- init ----------
+  refreshTestRows();
+  renderDashboard();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(()=>{});
+    });
+  }
+})();
+</script>
+</body>
+</html>
