@@ -387,7 +387,9 @@
         <div class="chip-row" id="dashFormatFilters">
           <div class="chip active" data-fmt="Overall">Overall</div>
           <div class="chip" data-fmt="Test">Test</div>
+          <div class="chip" data-fmt="First Class">First Class</div>
           <div class="chip" data-fmt="ODI">ODI</div>
+          <div class="chip" data-fmt="List A">List A</div>
           <div class="chip" data-fmt="T20I">T20I</div>
           <div class="chip" data-fmt="IPL">IPL</div>
           <div class="chip" data-fmt="Club Cricket">Club Cricket</div>
@@ -406,7 +408,7 @@
             <div class="field"><label>Date</label><input type="date" id="f-date" required></div>
             <div class="field"><label>Format</label>
               <select id="f-format">
-                <option>Test</option><option selected>ODI</option><option>T20I</option><option>IPL</option><option>Club Cricket</option><option>Other</option><option>Custom</option>
+                <option>Test</option><option>First Class</option><option selected>ODI</option><option>List A</option><option>T20I</option><option>IPL</option><option>Club Cricket</option><option>Other</option><option>Custom</option>
               </select>
             </div>
           </div>
@@ -414,12 +416,32 @@
           <div class="field">
             <label>Opposition</label>
             <select id="f-opp-select">
-              <option>Australia</option><option>England</option><option>India</option><option>Pakistan</option>
-              <option>South Africa</option><option>New Zealand</option><option>Sri Lanka</option>
-              <option>West Indies</option><option>Bangladesh</option><option>Afghanistan</option>
-              <option>Zimbabwe</option><option>Ireland</option><option>Scotland</option><option>Netherlands</option>
-              <option>UAE</option><option>USA</option><option>Nepal</option><option>Namibia</option>
-              <option>Oman</option><option>Canada</option><option>PNG</option>
+              <optgroup label="International">
+                <option>Australia</option><option>England</option><option>India</option><option>Pakistan</option>
+                <option>South Africa</option><option>New Zealand</option><option>Sri Lanka</option>
+                <option>West Indies</option><option>Bangladesh</option><option>Afghanistan</option>
+                <option>Zimbabwe</option><option>Ireland</option><option>Scotland</option><option>Netherlands</option>
+                <option>UAE</option><option>USA</option><option>Nepal</option><option>Namibia</option>
+                <option>Oman</option><option>Canada</option><option>PNG</option>
+              </optgroup>
+              <optgroup label="Ranji Trophy Teams">
+                <option>Andhra</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option>
+                <option>Baroda</option><option>Bengal</option><option>Chandigarh</option><option>Chhattisgarh</option>
+                <option>Delhi</option><option>Goa</option><option>Gujarat</option><option>Haryana</option>
+                <option>Himachal Pradesh</option><option>Hyderabad</option><option>Jammu and Kashmir</option>
+                <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option>
+                <option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option>
+                <option>Mumbai</option><option>Nagaland</option><option>Odisha</option><option>Puducherry</option>
+                <option>Punjab</option><option>Railways</option><option>Rajasthan</option><option>Saurashtra</option>
+                <option>Services</option><option>Sikkim</option><option>Tamil Nadu</option><option>Tripura</option>
+                <option>Uttar Pradesh</option><option>Uttarakhand</option><option>Vidarbha</option>
+              </optgroup>
+              <optgroup label="IPL Teams">
+                <option>Chennai Super Kings</option><option>Mumbai Indians</option><option>Royal Challengers Bengaluru</option>
+                <option>Kolkata Knight Riders</option><option>Delhi Capitals</option><option>Punjab Kings</option>
+                <option>Rajasthan Royals</option><option>Sunrisers Hyderabad</option><option>Gujarat Titans</option>
+                <option>Lucknow Super Giants</option>
+              </optgroup>
               <option value="__other__">Other (type below)</option>
             </select>
             <input type="text" id="f-opp-other" placeholder="Team / club name" style="margin-top:8px; display:none;">
@@ -564,7 +586,9 @@
         <div class="chip-row" id="formatFilters">
           <div class="chip active" data-fmt="Overall">Overall</div>
           <div class="chip" data-fmt="Test">Test</div>
+          <div class="chip" data-fmt="First Class">First Class</div>
           <div class="chip" data-fmt="ODI">ODI</div>
+          <div class="chip" data-fmt="List A">List A</div>
           <div class="chip" data-fmt="T20I">T20I</div>
           <div class="chip" data-fmt="IPL">IPL</div>
           <div class="chip" data-fmt="Club Cricket">Club Cricket</div>
@@ -807,7 +831,7 @@
     bowlInnings1Label.textContent = bowlTwiceToggle.checked ? '1st Innings' : 'Innings';
   });
   function refreshTestRows(){
-    const isTest = formatSelect.value === 'Test';
+    const isTest = formatSelect.value === 'Test' || formatSelect.value === 'First Class';
     batTwiceRow.style.display = (isTest && batToggle.checked) ? '' : 'none';
     bowlTwiceRow.style.display = (isTest && bowlToggle.checked) ? '' : 'none';
     if(!isTest){
@@ -839,7 +863,7 @@
 
     const batted = batToggle.checked;
     const bowled = bowlToggle.checked;
-    const isTest = formatSelect.value === 'Test';
+    const isTest = formatSelect.value === 'Test' || formatSelect.value === 'First Class';
 
     let battingArr = [];
     if(batted){
